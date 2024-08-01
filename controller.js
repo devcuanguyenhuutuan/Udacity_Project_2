@@ -1,21 +1,21 @@
+import { NOT_VALID_MESSAGE, SERVER_ERROR_MESSAGE } from './constant.js';
 import { filterImageFromURL, deleteLocalFiles } from './util/util.js';
 
 export const filteredImageController = async (req, res, next) => {
+    const { image_url: url } = req.query;
     try {
-        const imageUrl = req.query.image_url;
-        if (!imageUrl) {
-            return res.status(400).send('Image URL is required');
+        if (!url) {
+            return res.status(400).send(NOT_VALID_MESSAGE);
         }
-        const filteredImagePath = await filterImageFromURL(imageUrl);
-        res.sendFile(filteredImagePath, (err) => {
-            if (err) {
-                console.error('Error sending file:', err);
-                return res.status(422).send('Image URL is invalid');
+        const imagePath = await filterImageFromURL(url);
+        res.sendFile(imagePath, (e) => {
+            if (e) {
+                return res.status(400).send(NOT_VALID_MESSAGE);
             }
-            deleteLocalFiles([filteredImagePath]);
+            deleteLocalFiles([imagePath]);
         });
     } catch (error) {
-        const errorMessage = error?.toString() ?? "error from Server !";
+        const errorMessage = error?.toString();
         console.log('ERROR:', errorMessage);
         return res.status(500).send(`ERROR: ${errorMessage}`);
     }
